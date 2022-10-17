@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import ua.vision.moiro.vision.DTO.RoleToUserForm;
 import ua.vision.moiro.vision.model.Role;
 import ua.vision.moiro.vision.model.User;
 import ua.vision.moiro.vision.service.UserService;
@@ -46,8 +47,3 @@ public class UserController {
     }
 }
 
-@Data
-class RoleToUserForm {
-    private String name;
-    private String roleName;
-}
