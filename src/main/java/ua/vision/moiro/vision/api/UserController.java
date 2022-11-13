@@ -2,63 +2,81 @@ package ua.vision.moiro.vision.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
+import ua.vision.moiro.vision.DTO.LoginDto;
+import ua.vision.moiro.vision.DTO.SignUpDto;
+import ua.vision.moiro.vision.DTO.UserProfile;
+import ua.vision.moiro.vision.exception.UserExistsInApp;
 import ua.vision.moiro.vision.model.User;
+import ua.vision.moiro.vision.security.jwt.JwtTokenProvider;
 import ua.vision.moiro.vision.service.UserService;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/user")
 public class UserController {
     private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService,
+                          AuthenticationManager authenticationManager,
+                          JwtTokenProvider jwtTokenProvider) {
         this.userService = userService;
-    }
-
-    @GetMapping
-    public ResponseEntity<List<User>> getAll() {
-        List<User> userList = userService.findAll();
-        return new ResponseEntity<>(userList, OK);
-    }
-
-    @GetMapping(path = "/{userId}")
-    public ResponseEntity<User> getById(@PathVariable("userId") Integer userId) {
-        User user = userService.findById(userId);
-        return new ResponseEntity<>(user, OK);
-    }
-
-    @GetMapping(path = "/email")
-    public ResponseEntity<User> getById(@RequestBody String email) {
-        Optional<User> user = userService.findAll()
-                .stream()
-                .filter(c -> c.getEmail().equals(email))
-                .findFirst();
-        return new ResponseEntity<>(user.get(), OK);
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @PostMapping(path = "/register")
-    public ResponseEntity<User> createUser(@RequestBody User entity) {
-        User user = userService.createUser(entity);
-        return new ResponseEntity<>(user, CREATED);
+    public ResponseEntity<?> registrationUser(@RequestBody SignUpDto signUpDto) {
+        User user = userService.registrationUser(signUpDto);
+        return new ResponseEntity<>(CREATED);
     }
 
-    @PutMapping(path = "/{userId}")
-    public ResponseEntity<?> updateUserById(@RequestBody User entity, @PathVariable Integer userId) {
-        userService.updateUserById(entity, userId);
-        return new ResponseEntity<>(OK);
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@RequestBody LoginDto loginDto) {
+        try {
+            String email = loginDto.getEmail();
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, loginDto.getPassword()));
+            User user = userService.findByEmail(email);
+
+            if (user == null) {
+                throw new UserExistsInApp(email);
+            }
+
+            String token = jwtTokenProvider.createToken(email, user.getRoles());
+
+            Map<Object, Object> response = new HashMap<>();
+            response.put("username", email);
+            response.put("token", token);
+
+            return ResponseEntity.ok(response);
+        } catch (AuthenticationException e) {
+            throw new BadCredentialsException("Invalid username or password");
+        }
     }
 
-    @DeleteMapping(path = "/{userId}")
-    public ResponseEntity<?> deleteUserById(@PathVariable Integer userId) {
-        userService.deleteUserById(userId);
-        return new ResponseEntity<>(OK);
+}
+
+    @GetMapping("/profile/{id}")
+    public ResponseEntity<UserProfile> getInformationAboutUser(@PathVariable Integer id) {
+        User user = userService.findById(id);
+        return new ResponseEntity<>(UserProfile.builder()
+                .name(user.getName())
+                .surname(user.getSurname())
+                .phone(user.getPhone())
+                .email(user.getEmail())
+                .build(), OK);
     }
 }
 

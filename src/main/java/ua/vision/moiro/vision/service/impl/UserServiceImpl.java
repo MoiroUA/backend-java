@@ -1,21 +1,36 @@
 package ua.vision.moiro.vision.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import ua.vision.moiro.vision.DTO.SignUpDto;
+import ua.vision.moiro.vision.exception.EmailNotFound;
+import ua.vision.moiro.vision.exception.UserExistsInApp;
+import ua.vision.moiro.vision.model.Role;
 import ua.vision.moiro.vision.model.User;
+import ua.vision.moiro.vision.repository.RoleRepository;
 import ua.vision.moiro.vision.repository.UserRepository;
 import ua.vision.moiro.vision.service.UserService;
 
 import javax.transaction.Transactional;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository,
+                           RoleRepository roleRepository,
+                           BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -31,19 +46,31 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByEmail(String email) {
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new RuntimeException();
-        } else {
-            return user;
-        }
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User with email not found"));
     }
 
     @Override
     @Transactional
-    public User createUser(User entity) {
-        userRepository.save(entity);
-        return entity;
+    public User registrationUser(SignUpDto entity) {
+        Boolean existUser =  userRepository.existsByEmail(entity.getEmail());
+        if(existUser) {
+            throw new UserExistsInApp(entity.getEmail());
+        } else {
+            Role roleUser = roleRepository.findByName("ROLE_USER");
+            Set<Role> roles = new HashSet<>();
+            roles.add(roleUser);
+
+            String password = passwordEncoder.encode(entity.getPassword());
+
+            User newUser = new User(entity.getName(),
+                    entity.getSurname(),
+                    entity.getEmail(),
+                    password,
+                    roles);
+
+            return userRepository.save(newUser);
+        }
     }
 
     @Override
@@ -63,6 +90,16 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(RuntimeException::new);
         userRepository.delete(user);
+    }
+
+    @Override
+    public Boolean existsByEmail(String email) {
+        var exist = userRepository.existsByEmail(email);
+        if(exist) {
+            return true;
+        } else {
+            throw new EmailNotFound(email);
+        }
     }
 
 }

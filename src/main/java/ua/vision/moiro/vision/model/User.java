@@ -1,9 +1,9 @@
 package ua.vision.moiro.vision.model;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.Id;
 import javax.persistence.Entity;
@@ -16,6 +16,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.FetchType;
 import javax.persistence.CascadeType;
+import javax.persistence.ManyToOne;
 
 import java.util.Set;
 
@@ -44,9 +45,24 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "phone", nullable = true, unique = true, length = 15)
+    private String phone;
+
+    @ManyToOne
+    @JoinColumn(name = "type_blood_id", referencedColumnName = "id", nullable = false)
+    private TypeBlood typeBlood;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Set<Role> roles;
+
+    public User(String name, String surname, String email, String password, Set<Role> roles) {
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
+        this.password = password;
+        this.roles = roles;
+    }
 }
