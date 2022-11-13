@@ -6,7 +6,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ua.vision.moiro.vision.DTO.LoginDto;
 import ua.vision.moiro.vision.DTO.SignUpDto;
 import ua.vision.moiro.vision.DTO.UserProfile;
@@ -39,7 +43,7 @@ public class UserController {
 
     @PostMapping(path = "/register")
     public ResponseEntity<?> registrationUser(@RequestBody SignUpDto signUpDto) {
-        User user = userService.registrationUser(signUpDto);
+        userService.registrationUser(signUpDto);
         return new ResponseEntity<>(CREATED);
     }
 
@@ -60,17 +64,15 @@ public class UserController {
             response.put("username", email);
             response.put("token", token);
 
-            return ResponseEntity.ok(response);
+            return new ResponseEntity<>(response, OK);
         } catch (AuthenticationException e) {
             throw new BadCredentialsException("Invalid username or password");
         }
     }
 
-}
-
-    @GetMapping("/profile/{id}")
-    public ResponseEntity<UserProfile> getInformationAboutUser(@PathVariable Integer id) {
-        User user = userService.findById(id);
+    @GetMapping("/profile")
+    public ResponseEntity<UserProfile> getInformationAboutUser(@RequestBody String id) {
+        User user = userService.findByEmail(id);
         return new ResponseEntity<>(UserProfile.builder()
                 .name(user.getName())
                 .surname(user.getSurname())
