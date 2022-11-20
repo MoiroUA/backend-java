@@ -58,11 +58,12 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Set<Role> roles;
 
-    public User(String name, String surname, String email, String password, Set<Role> roles) {
+    public User(String name, String surname, String email, String password, Set<Role> roles, TypeBlood typeBlood) {
         this.name = name;
         this.surname = surname;
         this.email = email;
         this.password = password;
         this.roles = roles;
+        this.typeBlood = typeBlood;
     }
 }

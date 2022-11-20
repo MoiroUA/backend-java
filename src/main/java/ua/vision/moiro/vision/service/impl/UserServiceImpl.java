@@ -8,8 +8,10 @@ import ua.vision.moiro.vision.DTO.SignUpDto;
 import ua.vision.moiro.vision.exception.EmailNotFound;
 import ua.vision.moiro.vision.exception.UserExistsInApp;
 import ua.vision.moiro.vision.model.Role;
+import ua.vision.moiro.vision.model.TypeBlood;
 import ua.vision.moiro.vision.model.User;
 import ua.vision.moiro.vision.repository.RoleRepository;
+import ua.vision.moiro.vision.repository.TypeBloodRepository;
 import ua.vision.moiro.vision.repository.UserRepository;
 import ua.vision.moiro.vision.service.UserService;
 
@@ -22,14 +24,16 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final TypeBloodRepository typeBloodRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
-                           BCryptPasswordEncoder passwordEncoder) {
+                           TypeBloodRepository typeBloodRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.typeBloodRepository = typeBloodRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -57,9 +61,12 @@ public class UserServiceImpl implements UserService {
         if(existUser) {
             throw new UserExistsInApp(entity.getEmail());
         } else {
-            Role roleUser = roleRepository.findByName("ROLE_USER");
+            Role roleUser = roleRepository.findByName("USER");
             Set<Role> roles = new HashSet<>();
             roles.add(roleUser);
+
+            TypeBlood typeBlood = typeBloodRepository.findById(1).orElseThrow();
+
 
             String password = passwordEncoder.encode(entity.getPassword());
 
@@ -67,7 +74,8 @@ public class UserServiceImpl implements UserService {
                     entity.getSurname(),
                     entity.getEmail(),
                     password,
-                    roles);
+                    roles,
+                    typeBlood);
 
             return userRepository.save(newUser);
         }

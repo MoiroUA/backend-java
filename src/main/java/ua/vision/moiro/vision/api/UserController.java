@@ -19,8 +19,6 @@ import ua.vision.moiro.vision.model.User;
 import ua.vision.moiro.vision.security.jwt.JwtTokenProvider;
 import ua.vision.moiro.vision.service.UserService;
 
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -60,11 +58,7 @@ public class UserController {
 
             String token = jwtTokenProvider.createToken(email, user.getRoles());
 
-            Map<Object, Object> response = new HashMap<>();
-            response.put("username", email);
-            response.put("token", token);
-
-            return new ResponseEntity<>(response, OK);
+            return new ResponseEntity<>(token, OK);
         } catch (AuthenticationException e) {
             throw new BadCredentialsException("Invalid username or password");
         }

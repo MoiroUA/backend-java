@@ -1,14 +1,11 @@
 package ua.vision.moiro.vision.DTO;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
 @Builder
+@AllArgsConstructor
 public class UserProfile {
     private String name;
     private String surname;

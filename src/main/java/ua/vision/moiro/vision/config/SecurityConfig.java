@@ -24,8 +24,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final SecurityUserDetailsService securityUserDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-
-//    private static final String ADMIN_ENDPOINT = "/api/v1/admin/**";
     private static final String REGISTER_ENDPOINT = "/user/**";
 
     @Autowired
