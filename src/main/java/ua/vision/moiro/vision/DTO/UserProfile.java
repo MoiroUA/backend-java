@@ -11,8 +11,8 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @Builder
 public class UserProfile {
-    private final String name;
-    private final String surname;
-    private final String email;
-    private final String phone;
+    private String name;
+    private String surname;
+    private String email;
+    private String phone;
 }
