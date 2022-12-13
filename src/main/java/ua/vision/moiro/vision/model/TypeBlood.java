@@ -1,6 +1,5 @@
 package ua.vision.moiro.vision.model;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,19 +11,23 @@ import javax.persistence.Table;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Column;
+import javax.persistence.OneToMany;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "role")
-public class Role {
+@Table(name = "type_blood")
+public class TypeBlood {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "name_role", length = 60)
-    private String name;
-}
+    @Column(name = "type")
+    private String type;
 
+    @OneToMany(mappedBy = "typeBlood")
+    List<User> users;
+}
