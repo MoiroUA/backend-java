@@ -65,7 +65,8 @@ public class UserServiceImpl implements UserService {
             Set<Role> roles = new HashSet<>();
             roles.add(roleUser);
 
-            TypeBlood typeBlood = typeBloodRepository.findById(1).orElseThrow();
+            TypeBlood typeBlood = typeBloodRepository.findById(1)
+                    .orElseThrow(RuntimeException::new);
 
 
             String password = passwordEncoder.encode(entity.getPassword());

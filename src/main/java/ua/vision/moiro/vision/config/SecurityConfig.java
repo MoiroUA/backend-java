@@ -54,11 +54,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .httpBasic().disable()
                 .csrf().disable()
+//                .cors().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, REGISTER_ENDPOINT).permitAll()
                 .antMatchers(HttpMethod.GET, REGISTER_ENDPOINT).permitAll()
+                .antMatchers(HttpMethod.GET, "/areas").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .apply(new JwtConfig(jwtTokenProvider));
