@@ -103,7 +103,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Boolean existsByEmail(String email) {
-        var exist = userRepository.existsByEmail(email);
+        Boolean exist = userRepository.existsByEmail(email);
         if(exist) {
             return true;
         } else {

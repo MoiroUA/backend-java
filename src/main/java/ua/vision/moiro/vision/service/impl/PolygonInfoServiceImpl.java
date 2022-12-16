@@ -31,7 +31,7 @@ public class PolygonInfoServiceImpl implements PolygonInfoService {
         List<PolygonDTO> polygonDTOList = new ArrayList<>();
 
         for (PolygonInfo polygonInfo: polygonInfoList) {
-           var listOfCoordinates = coordinatesRepository.findAllByPolygonInfo(polygonInfo);
+           List<Coordinates> listOfCoordinates = coordinatesRepository.findAllByPolygonInfo(polygonInfo);
            List<CoordinatesDTO> listResult = new ArrayList<>();
            for(Coordinates coordinates: listOfCoordinates) {
                CoordinatesDTO dto = new CoordinatesDTO(coordinates.getLatitude(), coordinates.getLongitude());
